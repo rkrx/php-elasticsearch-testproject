@@ -1,0 +1,75 @@
+<?php namespace ElasticSearch; ?>
+
+<?php /* @var \View\Workers\FileWorker $this */ ?>
+<?php /* @var \ElasticSearch\Result $results */ ?>
+<?php $this->layout('../layout') ?>
+<?php $results = $this->get('results') ?>
+
+<div class="suche">
+	<form action="">
+		<label for="searchterm">Suchbegriff:</label>
+		<input id="searchterm" name="q" type="text" value="<?= $this->getStr('search') ?>" />
+		<input id="submit" type="submit" value="Suchen" />
+	</form>
+</div>
+
+<?php if($results !== null): ?>
+
+<?php if($results->getSuggestions()->getPhraseSuggestions()->hasSuggestion()): ?>
+<p>Meinten Sie <strong><?= $results->getSuggestions()->getPhraseSuggestions() ?></strong></p>
+<?php endif ?>
+
+<div class="row">
+	<div class="col-md-3">
+		<?php foreach($results->getAggregations() as $aggregation): ?>
+		<h4><?= $aggregation->getKey() ?></h4>
+		<div><?= $aggregation->getValue() ?></div>
+		<div class="list-group">
+			<?php foreach($aggregation as $option): ?>
+			<?php if($option->getData()): ?>
+				<?php if(!hasValueInParam($aggregation->getKey(), $option->getKey())): ?>
+				<a href="/?<?= linkToSelf([$aggregation->getKey() => addToParam($aggregation->getKey(), [$option->getKey()])]) ?>" class="list-group-item">
+					<span class="badge"><?= $option->getDocCount() ?></span>
+					<?= $option->getData() ?>
+				</a>
+				<?php else: ?>
+					<a href="/?<?= linkToSelf([$aggregation->getKey() => removeToParam($aggregation->getKey(), [$option->getKey()])]) ?>" class="list-group-item active">
+						<span class="badge"><?= $option->getDocCount() ?></span>
+						<?= $option->getData() ?>
+					</a>
+				<?php endif ?>
+			<?php endif ?>
+			<?php endforeach ?>
+		</div>
+		<?php endforeach ?>
+	</div>
+	<div class="col-md-9">
+		<div>Suchbegriff: <strong><?= $this->getStr('search') ?></strong> (<?= $results->getSummary()->getTotalHits() ?> Results in <?= $results->getSummary()->getTotalTime() ?> Sec.)</div>
+
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Preis</th>
+					<th>Score</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($results->getHits() as $result): ?>
+				<tr>
+					<td align="right"><?= $result->getId() ?></td>
+					<td><?= $result->getData()['description']['de']['title'] ?></td>
+					<td align="right"><?= sprintf('%0.2f', $result->getData()['inventory']['domain-5']['price']) ?></td>
+					<td align="right"><?= sprintf('%0.4f', $result->getScore()) ?></td>
+				</tr>
+				<?php endforeach ?>
+			</tbody>
+		</table>
+
+		<pre><?= json_encode($results->getRequest(), JSON_PRETTY_PRINT) ?></pre>
+		<pre><?= strtr(json_encode($results->getResponse(), JSON_PRETTY_PRINT), ['<' => '&lt;', '>' => '&gt;']) ?></pre>
+	</div>
+</div>
+<?php endif ?>
+

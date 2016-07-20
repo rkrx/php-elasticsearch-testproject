@@ -1,0 +1,14 @@
+/*
+!/config
+/config/di-local.php
+!/public
+!/src
+!/src-test
+!/templates
+!/.editorconfig
+!/.gitattributes
+!/.gitignore
+!/composer.json
+!/composer.lock
+!/test.php
+!/update.php

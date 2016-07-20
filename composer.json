@@ -1,0 +1,21 @@
+{
+	"require": {
+		"ruflin/elastica": "*",
+		"rkr/php-di-ioc-adapter": "~0.1@stable",
+		"rkr/php-mysql-query-builder": "~0.1@stable",
+		"rkr/view": "~0.2@stable"
+	},
+    "autoload": {
+        "psr-4": {
+			"ElasticSearch\\": ["src/"]
+		}
+    },
+    "autoload-dev": {
+        "psr-4": {
+			"ElasticSearch\\": ["src/", "src-test/"]
+		},
+		"files": [
+			"src-test/functions.php"
+		]
+    }
+}
